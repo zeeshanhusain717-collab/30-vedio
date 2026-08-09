@@ -1,4 +1,4 @@
-name: Build 30 Video App APK
+name: Build 30 Video App APK 100% Working
 
 on:
   push:
@@ -16,19 +16,27 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Gradle 8.2
+    - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
       with:
         gradle-version: '8.2'
 
-    - name: Generate Complete Android Folders & Source Code
+    - name: Step 1 - Create Project Folders
       run: |
-        # 1. Folders Create करना
         mkdir -p app/src/main/java/com/app/thirtyvideo
         mkdir -p app/src/main/res/layout
         mkdir -p app/src/main/res/values
 
-        # 2. settings.gradle
+    - name: Step 2 - Create Gradle Properties (Fixes the AndroidX Error)
+      run: |
+        cat << 'EOF' > gradle.properties
+        org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+        android.useAndroidX=true
+        android.enableJetifier=true
+        EOF
+
+    - name: Step 3 - Create settings.gradle & Root build.gradle
+      run: |
         cat << 'EOF' > settings.gradle
         pluginManagement {
             repositories {
@@ -47,8 +55,7 @@ jobs:
         rootProject.name = "ThirtyVideo"
         include ':app'
         EOF
-
-        # 3. Root build.gradle
+        
         cat << 'EOF' > build.gradle
         plugins {
             id 'com.android.application' version '8.2.0' apply false
@@ -56,7 +63,8 @@ jobs:
         }
         EOF
 
-        # 4. App Level build.gradle
+    - name: Step 4 - Create App Level build.gradle
+      run: |
         cat << 'EOF' > app/build.gradle
         plugins {
             id 'com.android.application'
@@ -90,13 +98,14 @@ jobs:
             implementation 'com.google.android.material:material:1.11.0'
             implementation 'androidx.recyclerview:recyclerview:1.3.2'
             
-            // Google Media3 / ExoPlayer Video Engine
+            // Google Media3 / ExoPlayer Video Engine (Latest Stable)
             implementation 'androidx.media3:media3-exoplayer:1.2.1'
             implementation 'androidx.media3:media3-ui:1.2.1'
         }
         EOF
 
-        # 5. Theme Resource (Fixes App Crash)
+    - name: Step 5 - Create App Resources (UI & Theme)
+      run: |
         cat << 'EOF' > app/src/main/res/values/styles.xml
         <?xml version="1.0" encoding="utf-8"?>
         <resources>
@@ -105,12 +114,57 @@ jobs:
             </style>
         </resources>
         EOF
+        
+        cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#121212">
 
-        # 6. AndroidManifest.xml (App Name: 30 Video + Media Permissions)
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/playerView"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:background="#000000" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp" />
+        </LinearLayout>
+        EOF
+        
+        cat << 'EOF' > app/src/main/res/layout/item_video.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="6dp"
+            android:background="#1E1E1E">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
+        </LinearLayout>
+        EOF
+
+    - name: Step 6 - Create AndroidManifest.xml
+      run: |
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
+            <!-- Permissions for old and new Android devices -->
             <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
             <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
@@ -132,62 +186,8 @@ jobs:
         </manifest>
         EOF
 
-        # 7. Layout Main Screen (Player + Video List)
-        cat << 'EOF' > app/src/main/res/layout/activity_main.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:background="#121212">
-
-            <androidx.media3.ui.PlayerView
-                android:id="@+id/playerView"
-                android:layout_width="match_parent"
-                android:layout_height="250dp"
-                android:background="#000000" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="8dp" />
-
-        </LinearLayout>
-        EOF
-
-        # 8. Layout Single Video Item List
-        cat << 'EOF' > app/src/main/res/layout/item_video.xml
-        <?xml version="1.0" encoding="utf-8"?>
-        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="12dp"
-            android:layout_marginBottom="6dp"
-            android:background="#1E1E1E">
-
-            <TextView
-                android:id="@+id/tvTitle"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:maxLines="1"
-                android:ellipsize="end" />
-
-            <TextView
-                android:id="@+id/tvSub"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="#AAAAAA"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
-        EOF
-
-        # 9. Kotlin Source Code (Permissions + MediaStore Scan + RecyclerView + ExoPlayer)
+    - name: Step 7 - Create Kotlin Code (Smooth ExoPlayer & Permissions)
+      run: |
         cat << 'EOF' > app/src/main/java/com/app/thirtyvideo/MainActivity.kt
         package com.app.thirtyvideo
 
@@ -216,7 +216,7 @@ jobs:
 
         class MainActivity : AppCompatActivity() {
 
-            private lateinit var player: ExoPlayer
+            private var player: ExoPlayer? = null
             private lateinit var playerView: PlayerView
             private lateinit var recyclerView: RecyclerView
             private val PERMISSION_REQ_CODE = 101
@@ -229,10 +229,13 @@ jobs:
                 recyclerView = findViewById(R.id.recyclerView)
                 recyclerView.layoutManager = LinearLayoutManager(this)
 
+                initializePlayer()
+                checkAndRequestPermissions()
+            }
+
+            private fun initializePlayer() {
                 player = ExoPlayer.Builder(this).build()
                 playerView.player = player
-
-                checkAndRequestPermissions()
             }
 
             private fun checkAndRequestPermissions() {
@@ -258,7 +261,7 @@ jobs:
                 if (requestCode == PERMISSION_REQ_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     scanAndDisplayVideos()
                 } else {
-                    Toast.makeText(this, "वीडियो स्कैन करने के लिए परमिशन ज़रूरी है!", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "वीडियो देखने के लिए परमिशन ज़रूरी है!", Toast.LENGTH_LONG).show()
                 }
             }
 
@@ -278,7 +281,7 @@ jobs:
 
                     while (cursor.moveToNext()) {
                         val id = cursor.getLong(idCol)
-                        val name = cursor.getString(nameCol) ?: "Video"
+                        val name = cursor.getString(nameCol) ?: "Unknown Video"
                         val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
                         videos.add(VideoModel(id, name, contentUri))
                     }
@@ -288,8 +291,7 @@ jobs:
                     recyclerView.adapter = VideoAdapter(videos) { selectedVideo ->
                         playVideo(selectedVideo)
                     }
-                    playVideo(videos[0]) // Play first video by default
-                    Toast.makeText(this, "${videos.size} वीडियो मिले!", Toast.LENGTH_SHORT).show()
+                    playVideo(videos[0])
                 } else {
                     Toast.makeText(this, "मोबाइल में कोई वीडियो नहीं मिला!", Toast.LENGTH_SHORT).show()
                 }
@@ -297,19 +299,20 @@ jobs:
 
             private fun playVideo(video: VideoModel) {
                 val mediaItem = MediaItem.fromUri(video.uri)
-                player.setMediaItem(mediaItem)
-                player.playWhenReady = true
-                player.prepare()
+                player?.setMediaItem(mediaItem)
+                player?.prepare()
+                player?.playWhenReady = true
             }
 
             override fun onStop() {
                 super.onStop()
-                player.pause()
+                player?.pause()
             }
 
             override fun onDestroy() {
                 super.onDestroy()
-                player.release()
+                player?.release()
+                player = null
             }
 
             inner class VideoAdapter(
@@ -319,7 +322,6 @@ jobs:
 
                 inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
                     val tvTitle: TextView = v.findViewById(R.id.tvTitle)
-                    val tvSub: TextView = v.findViewById(R.id.tvSub)
                 }
 
                 override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -330,7 +332,6 @@ jobs:
                 override fun onBindViewHolder(holder: ViewHolder, position: Int) {
                     val item = list[position]
                     holder.tvTitle.text = item.name
-                    holder.tvSub.text = "Tap to play video"
                     holder.itemView.setOnClickListener { onClick(item) }
                 }
 
@@ -339,15 +340,15 @@ jobs:
         }
         EOF
 
-    - name: Generate Wrapper & Build APK
+    - name: Step 8 - Build APK
       run: |
         gradle wrapper --gradle-version 8.2
         chmod +x gradlew
         ./gradlew assembleDebug
 
-    - name: Upload Built APK
+    - name: Step 9 - Upload Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: 30-Video-APK
+        name: 30-Video-App-APK
         path: app/build/outputs/apk/debug/app-debug.apk
         
