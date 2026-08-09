@@ -16,6 +16,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+
     - name: Generate Complete Android Project & Source Code On The Fly
       run: |
         # 1. Folder Structure Create करना
@@ -90,7 +93,7 @@ jobs:
         }
         EOF
 
-        # 5. Gradle Wrapper Config (Fixes build wrapper errors)
+        # 5. Gradle Wrapper Config
         cat << 'EOF' > gradle/wrapper/gradle-wrapper.properties
         distributionBase=GRADLE_USER_HOME
         distributionPath=wrapper/dists
@@ -101,7 +104,7 @@ jobs:
         zipStorePath=wrapper/dists
         EOF
 
-        # 6. AndroidManifest.xml (App Name set to "30 Video")
+        # 6. AndroidManifest.xml (App Name: 30 Video)
         cat << 'EOF' > app/src/main/AndroidManifest.xml
         <?xml version="1.0" encoding="utf-8"?>
         <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -127,7 +130,7 @@ jobs:
         </manifest>
         EOF
 
-        # 7. Kotlin Source Code (Scan Storage + Fix Permission Callback + Auto Play)
+        # 7. Kotlin Source Code
         cat << 'EOF' > app/src/main/java/com/app/thirtyvideo/MainActivity.kt
         package com.app.thirtyvideo
 
@@ -250,14 +253,8 @@ jobs:
         </RelativeLayout>
         EOF
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-
-    - name: Grant Execute Permission for Gradlew
-      run: chmod +x gradlew || true
-
     - name: Build Debug APK
-      run: ./gradlew assembleDebug
+      run: gradle assembleDebug
 
     - name: Upload Built APK
       uses: actions/upload-artifact@v4
