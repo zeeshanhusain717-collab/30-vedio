@@ -1,4 +1,4 @@
-name: Build Advance Zeeshan Video App APK
+name: Build Z+2 Vedios App APK 100% Working
 
 on:
   push:
@@ -21,90 +21,401 @@ jobs:
       with:
         gradle-version: '8.2'
 
-    - name: Step 1 - Setup Project Structure
+    - name: Step 1 - Create Project Folders
       run: |
-        mkdir -p app/src/main/java/com/app/zvedios
+        mkdir -p app/src/main/java/com/app/thirtyvideo
         mkdir -p app/src/main/res/layout
         mkdir -p app/src/main/res/values
         mkdir -p app/src/main/res/drawable
         mkdir -p app/src/main/res/mipmap-anydpi-v26
 
-    - name: Step 2 - Create Configs (Strings, Colors, Styles)
+    - name: Step 2 - Create Gradle Properties (Fixes the AndroidX Error)
       run: |
-        # Strings.xml (App Name & Toolbar Name)
-        cat << 'EOF' > app/src/main/res/values/strings.xml
-        <resources>
-            <string name="app_name">Z+2 Vedios</string>
-            <string name="toolbar_title">Zeeshan vedios</string>
-        </resources>
+        cat << 'EOF' > gradle.properties
+        org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+        android.useAndroidX=true
+        android.enableJetifier=true
         EOF
 
-        # Colors.xml
-        cat << 'EOF' > app/src/main/res/values/colors.xml
-        <resources>
-            <color name="black">#000000</color>
-            <color name="dark_grey">#121212</color>
-            <color name="gold">#FFD700</color>
-            <color name="white">#FFFFFF</color>
-        </resources>
+    - name: Step 3 - Create settings.gradle & Root build.gradle
+      run: |
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "ZPlus2Vedios"
+        include ':app'
+        EOF
+        
+        cat << 'EOF' > build.gradle
+        plugins {
+            id 'com.android.application' version '8.2.0' apply false
+            id 'org.jetbrains.kotlin.android' version '1.9.20' apply false
+        }
         EOF
 
-        # Styles.xml
+    - name: Step 4 - Create App Level build.gradle
+      run: |
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+            id 'org.jetbrains.kotlin.android'
+        }
+
+        android {
+            namespace 'com.app.thirtyvideo'
+            compileSdk 34
+
+            defaultConfig {
+                applicationId "com.app.thirtyvideo"
+                minSdk 24
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
+
+        dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'com.google.android.material:material:1.11.0'
+            implementation 'androidx.recyclerview:recyclerview:1.3.2'
+            
+            // Google Media3 / ExoPlayer Video Engine
+            implementation 'androidx.media3:media3-exoplayer:1.2.1'
+            implementation 'androidx.media3:media3-ui:1.2.1'
+        }
+        EOF
+
+    - name: Step 5 - Create App Resources (UI & Theme)
+      run: |
         cat << 'EOF' > app/src/main/res/values/styles.xml
+        <?xml version="1.0" encoding="utf-8"?>
         <resources>
             <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-                <item name="android:statusBarColor">#000000</item>
+                <item name="colorPrimary">#5C3317</item> <!-- Chocolate theme color -->
             </style>
         </resources>
         EOF
-
-    - name: Step 3 - Create App Icon (Code Generated Z Logo)
-      run: |
-        # Icon XML
-        cat << 'EOF' > app/src/main/res/drawable/ic_app_icon.xml
-        <vector xmlns:android="http://schemas.android.com/apk/res/android"
-            android:width="108dp" android:height="108dp"
-            android:viewportWidth="100" android:viewportHeight="100">
-            <!-- Golden Circle -->
-            <path android:fillColor="#FFD700" android:pathData="M 50,5 C 25.15,5 5,25.15 5,50 C 5,74.85 25.15,95 50,95 C 74.85,95 95,74.85 95,50 C 95,25.15 74.85,5 50,5 Z" />
-            <!-- Chocolate & Blue Z -->
-            <path android:fillColor="#D2691E" android:pathData="M 25,30 L 75,30 L 75,40 L 40,70 L 75,70 L 75,80 L 25,80 L 25,70 L 60,40 L 25,40 Z" />
-            <path android:fillColor="#0000FF" android:pathData="M 22,27 L 72,27 L 72,37 L 37,67 L 72,67 L 72,77 L 22,77 L 22,67 L 57,37 L 22,37 Z" />
-        </vector>
-        EOF
-
-        # Adaptive Icon Setup
-        cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
-        <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
-            <background android:drawable="@color/black"/>
-            <foreground android:drawable="@drawable/ic_app_icon"/>
-        </adaptive-icon>
-        EOF
-
-    - name: Step 4 - Create Layouts (Folder View & Video List)
-      run: |
-        # Main Activity Layout (Folder View)
+        
         cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+        <?xml version="1.0" encoding="utf-8"?>
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-            android:layout_width="match_parent" android:layout_height="match_parent"
-            android:orientation="vertical" android:background="#121212">
-            <TextView android:layout_width="match_parent" android:layout_height="?attr/actionBarSize"
-                android:text="@string/toolbar_title" android:gravity="center_vertical"
-                android:paddingStart="16dp" android:textColor="#FFD700"
-                android:textSize="20sp" android:textStyle="bold" android:background="#1F1F1F"/>
-            <androidx.recyclerview.widget.RecyclerView android:id="@+id/rvFolders"
-                android:layout_width="match_parent" android:layout_height="match_parent"/>
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:background="#121212">
+
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/playerView"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:background="#000000" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp" />
+        </LinearLayout>
+        EOF
+        
+        cat << 'EOF' > app/src/main/res/layout/item_video.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp"
+            android:layout_marginBottom="6dp"
+            android:background="#1E1E1E">
+
+            <TextView
+                android:id="@+id/tvTitle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:maxLines="1"
+                android:ellipsize="end" />
         </LinearLayout>
         EOF
 
-    - name: Step 5 - Create Kotlin Source (Advanced Logic)
+    - name: Step 6 - Create App Icon (Chocolate & White Z)
       run: |
-        # Main Activity (Scanner Logic)
-        cat << 'EOF' > app/src/main/java/com/app/zvedios/MainActivity.kt
-        package com.app.zvedios
+        # Background Layer (Chocolate Color)
+        cat << 'EOF' > app/src/main/res/drawable/ic_launcher_background.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <vector xmlns:android="http://schemas.android.com/apk/res/android"
+            android:width="108dp" android:height="108dp"
+            android:viewportWidth="108" android:viewportHeight="108">
+            <path android:fillColor="#5C3317"
+                  android:pathData="M0,0h108v108h-108z"/>
+        </vector>
+        EOF
+
+        # Foreground Layer (White Geometric Z Shape)
+        cat << 'EOF' > app/src/main/res/drawable/ic_launcher_foreground.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <vector xmlns:android="http://schemas.android.com/apk/res/android"
+            android:width="108dp" android:height="108dp"
+            android:viewportWidth="108" android:viewportHeight="108">
+            <path android:fillColor="#FFFFFF"
+                  android:pathData="M 30,30 H 78 V 42 L 48,76 H 78 V 88 H 30 V 76 L 60,42 H 30 V 30 Z"/>
+        </vector>
+        EOF
+
+        # Adaptive Icon Mapping
+        cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+            <background android:drawable="@drawable/ic_लो भाई! एकदम आपकी डिमांड के हिसाब से मैंने कोड तैयार कर दिया है। 
+
+इसमें मैंने एक **नया Step 6** जोड़ दिया है, जो एकदम सटीक गणित (Algebra & Geometry) के हिसाब से **चॉकलेट बैकग्राउंड (#4A2511)** और **सफेद रंग (#FFFFFF)** में एक परफेक्ट 'Z' आकार का वेक्टर आइकॉन (Vector Drawable) बनाएगा। साथ ही, ऐप का नाम बदलकर एकदम सटीक **"Z+2 Vedios"** सेट कर दिया है। 
+
+बस अपना पुराना कोड हटाओ और नीचे दिया गया यह पूरा नया कोड अपनी `build.yml` (या जो भी नाम हो) फाइल में पेस्ट कर दो:
+
+```yaml
+name: Build Z+2 Vedios App APK 100% Working
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.2'
+
+    - name: Step 1 - Create Project Folders
+      run: |
+        mkdir -p app/src/main/java/com/app/thirtyvideo
+        mkdir -p app/src/main/res/layout
+        mkdir -p app/src/main/res/values
+        mkdir -p app/src/main/res/drawable
+
+    - name: Step 2 - Create Gradle Properties (Fixes the AndroidX Error)
+      run: |
+        cat << 'EOF' > gradle.properties
+        org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+        android.useAndroidX=true
+        android.enableJetifier=true
+        EOF
+
+    - name: Step 3 - Create settings.gradle & Root build.gradle
+      run: |
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories {
+                google()
+                mavenCentral()
+                gradlePluginPortal()
+            }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories {
+                google()
+                mavenCentral()
+            }
+        }
+        rootProject.name = "ThirtyVideo"
+        include ':app'
+        EOF
+        
+        cat << 'EOF' > build.gradle
+        plugins {
+            id 'com.android.application' version '8.2.0' apply false
+            id 'org.jetbrains.kotlin.android' version '1.9.20' apply false
+        }
+        EOF
+
+    - name: Step 4 - Create App Level build.gradle
+      run: |
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+            id 'org.jetbrains.kotlin.android'
+        }
+
+        android {
+            namespace 'com.app.thirtyvideo'
+            compileSdk 34
+
+            defaultConfig {
+                applicationId "com.app.thirtyvideo"
+                minSdk 24
+                targetSdk 34
+                versionCode 1
+                versionName "1.0"
+            }
+
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+        }
+
+        dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'com.google.android.material:material:1.11.0'
+            implementation 'androidx.recyclerview:recyclerview:1.3.2'
+            
+            // Google Media3 / ExoPlayer Video Engine (Latest Stable)
+            implementation 'androidx.media3:media3-exoplayer:1.2.1'
+            implementation 'androidx.media3:media3-ui:1.2.1'
+        }
+        EOF
+
+    - name: Step 5 - Create App Resources (UI & Theme)
+      run: |
+        cat << 'EOF' > app/src/main/res/values/styles.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <resources>
+            <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+                <item name="colorPrimary">#4A2511</item> <!-- Chocolate Primary Color -->
+            </style>
+        </resources>
+        EOF
+        
+        cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout android:background="#121212" android:layout_height="match_parent" android:layout_width="match_parent" android:orientation="vertical" xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/playerView"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:background="#000000" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="8dp" />
+        </LinearLayout>
+        EOF
+        
+        cat << 'EOF' > app/src/main/res/layout/item_video.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout android:background="#1E1E1E" android:layout_height="wrap_content" android:layout_marginBottom="6dp" android:layout_width="match_parent" android:orientation="vertical" android:padding="12dp" xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+
+            <TextView android:ellipsize="end" android:id="@+id/tvTitle" android:layout_height="wrap_content" android:layout_width="match_parent" android:maxLines="1" android:textColor="#FFFFFF" android:textSize="16sp" android:textStyle="bold"/>
+        </LinearLayout>
+        EOF
+
+    - name: Step 6 - Create App Icon Folders & Vector Drawable (Chocolate & White Z)
+      run: |
+        cat << 'EOF' > app/src/main/res/drawable/ic_launcher.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <vector xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)"
+            android:width="108dp"
+            android:height="108dp"
+            android:viewportWidth="108"
+            android:viewportHeight="108">
+            <!-- Chocolate Background (Square) -->
+            <path
+                android:fillColor="#4A2511"
+                android:pathData="M0,0h108v108h-108z" />
+            <!-- Perfect Geometric White Z -->
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M 34 30 H 74 V 42 L 46 66 H 74 V 78 H 34 V 66 L 62 42 H 34 Z" />
+        </vector>
+        EOF
+        
+        cat << 'EOF' > app/src/main/res/drawable/ic_launcher_round.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <vector xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)"
+            android:width="108dp"
+            android:height="108dp"
+            android:viewportWidth="108"
+            android:viewportHeight="108">
+            <!-- Chocolate Background (Circle) -->
+            <path
+                android:fillColor="#4A2511"
+                android:pathData="M54,54 m-54,0 a54,54 0 1,1 108,0 a54,54 0 1,1 -108,0" />
+            <!-- Perfect Geometric White Z -->
+            <path
+                android:fillColor="#FFFFFF"
+                android:pathData="M 34 30 H 74 V 42 L 46 66 H 74 V 78 H 34 V 66 L 62 42 H 34 Z" />
+        </vector>
+        EOF
+
+    - name: Step 7 - Create AndroidManifest.xml (With Z+2 Vedios Name & Icon)
+      run: |
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="[http://schemas.android.com/apk/res/android](http://schemas.android.com/apk/res/android)">
+            <!-- Permissions for old and new Android devices -->
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+            <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+
+            <application
+                android:allowBackup="true"
+                android:icon="@drawable/ic_launcher"
+                android:roundIcon="@drawable/ic_launcher_round"
+                android:label="Z+2 Vedios"
+                android:supportsRtl="true"
+                android:theme="@style/AppTheme">
+                <activity
+                    android:name=".MainActivity"
+                    android:exported="true"
+                    android:configChanges="orientation|screenSize|keyboardHidden">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+            </application>
+        </manifest>
+        EOF
+
+    - name: Step 8 - Create Kotlin Code (Smooth ExoPlayer & Permissions)
+      run: |
+        cat << 'EOF' > app/src/main/java/com/app/thirtyvideo/MainActivity.kt
+        package com.app.thirtyvideo
+
         import android.Manifest
-        import android.content.Intent
+        import android.content.ContentUris
         import android.content.pm.PackageManager
+        import android.net.Uri
         import android.os.Build
         import android.os.Bundle
         import android.provider.MediaStore
@@ -112,148 +423,93 @@ jobs:
         import android.view.View
         import android.view.ViewGroup
         import android.widget.TextView
+        import android.widget.Toast
         import androidx.appcompat.app.AppCompatActivity
         import androidx.core.app.ActivityCompat
         import androidx.core.content.ContextCompat
+        import androidx.media3.common.MediaItem
+        import androidx.media3.exoplayer.ExoPlayer
+        import androidx.media3.ui.PlayerView
         import androidx.recyclerview.widget.LinearLayoutManager
         import androidx.recyclerview.widget.RecyclerView
 
-        data class Folder(val id: String, val name: String)
+        data class VideoModel(val id: Long, val name: String, val uri: Uri)
 
         class MainActivity : AppCompatActivity() {
+
+            private var player: ExoPlayer? = null
+            private lateinit var playerView: PlayerView
+            private lateinit var recyclerView: RecyclerView
+            private val PERMISSION_REQ_CODE = 101
+
             override fun onCreate(savedInstanceState: Bundle?) {
                 super.onCreate(savedInstanceState)
                 setContentView(R.layout.activity_main)
-                val rv = findViewById<RecyclerView>(R.id.rvFolders)
-                rv.layoutManager = LinearLayoutManager(this)
-                
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED) {
-                        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_MEDIA_VIDEO), 1)
-                    } else loadFolders(rv)
+
+                playerView = findViewById(R.id.playerView)
+                recyclerView = findViewById(R.id.recyclerView)
+                recyclerView.layoutManager = LinearLayoutManager(this)
+
+                initializePlayer()
+                checkAndRequestPermissions()
+            }
+
+            private fun initializePlayer() {
+                player = ExoPlayer.Builder(this).build()
+                playerView.player = player
+            }
+
+            private fun checkAndRequestPermissions() {
+                val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Manifest.permission.READ_MEDIA_VIDEO
                 } else {
-                    ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE), 1)
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                }
+
+                if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, arrayOf(permission), PERMISSION_REQ_CODE)
+                } else {
+                    scanAndDisplayVideos()
                 }
             }
 
-            private fun loadFolders(rv: RecyclerView) {
-                val folders = mutableListOf<Folder>()
-                val cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, arrayOf(MediaStore.Video.Media.BUCKET_ID, MediaStore.Video.Media.BUCKET_DISPLAY_NAME), null, null, null)
-                val set = mutableSetOf<String>()
-                cursor?.use {
-                    val idCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_ID)
-                    val nameCol = it.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
-                    while(it.moveToNext()){
-                        val id = it.getString(idCol)
-                        val name = it.getString(nameCol) ?: "Internal"
-                        if(set.add(id)) folders.add(Folder(id, name))
+            override fun onRequestPermissionsResult(
+                requestCode: Int,
+                permissions: Array<out String>,
+                grantResults: IntArray
+            ) {
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+                if (requestCode == PERMISSION_REQ_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    scanAndDisplayVideos()
+                } else {
+                    Toast.makeText(this, "वीडियो देखने के लिए परमिशन ज़रूरी है!", Toast.LENGTH_LONG).show()
+                }
+            }
+
+            private fun scanAndDisplayVideos() {
+                val videos = mutableListOf<VideoModel>()
+                val projection = arrayOf(
+                    MediaStore.Video.Media._ID,
+                    MediaStore.Video.Media.DISPLAY_NAME
+                )
+
+                contentResolver.query(
+                    MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+                    projection, null, null, MediaStore.Video.Media.DATE_ADDED + " DESC"
+                )?.use { cursor ->
+                    val idCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
+                    val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
+
+                    while (cursor.moveToNext()) {
+                        val id = cursor.getLong(idCol)
+                        val name = cursor.getString(nameCol) ?: "Unknown Video"
+                        val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
+                        videos.add(VideoModel(id, name, contentUri))
                     }
                 }
-                rv.adapter = FolderAdapter(folders) { f ->
-                    val i = Intent(this, VideoListActivity::class.java)
-                    i.putExtra("ID", f.id)
-                    i.putExtra("NAME", f.name)
-                    startActivity(i)
-                }
-            }
-        }
-        
-        class FolderAdapter(val list: List<Folder>, val onClick: (Folder) -> Unit): RecyclerView.Adapter<FolderAdapter.VH>() {
-            class VH(v: View): RecyclerView.ViewHolder(v) { val t: TextView = v.findViewById(android.R.id.text1) }
-            override fun onCreateViewHolder(p: ViewGroup, t: Int) = VH(LayoutInflater.from(p.context).inflate(android.R.layout.simple_list_item_1, p, false).apply{ findViewById<TextView>(android.R.id.text1).setTextColor(-1) })
-            override fun onBindViewHolder(h: VH, p: Int) { h.t.text = list[p].name; h.itemView.setOnClickListener { onClick(list[p]) } }
-            override fun getItemCount() = list.size
-        }
-        EOF
 
-        # Video List Activity (With Duration & Size)
-        cat << 'EOF' > app/src/main/java/com/app/zvedios/VideoListActivity.kt
-        package com.app.zvedios
-        import android.content.ContentUris
-        import android.content.Intent
-        import android.net.Uri
-        import android.os.Bundle
-        import android.provider.MediaStore
-        import android.view.LayoutInflater
-        import android.view.View
-        import android.view.ViewGroup
-        import android.widget.TextView
-        import androidx.appcompat.app.AppCompatActivity
-        import androidx.recyclerview.widget.LinearLayoutManager
-        import androidx.recyclerview.widget.RecyclerView
-        import java.util.concurrent.TimeUnit
-
-        class VideoListActivity : AppCompatActivity() {
-            override fun onCreate(savedInstanceState: Bundle?) {
-                super.onCreate(savedInstanceState)
-                val rv = RecyclerView(this)
-                rv.layoutManager = LinearLayoutManager(this)
-                setContentView(rv)
-                val bucketId = intent.getStringExtra("ID")
-                
-                val list = mutableListOf<String>() // Simple string list for demo
-                val cursor = contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, 
-                    arrayOf(MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.SIZE, MediaStore.Video.Media.DURATION, MediaStore.Video.Media._ID), 
-                    "${MediaStore.Video.Media.BUCKET_ID} = ?", arrayOf(bucketId), null)
-                
-                cursor?.use {
-                    while(it.moveToNext()){
-                        val name = it.getString(0)
-                        val size = it.getLong(1) / 1024 / 1024
-                        val dur = TimeUnit.MILLISECONDS.toMinutes(it.getLong(2))
-                        val id = it.getLong(3)
-                        val uri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
-                        rv.adapter = VideoAdapter(mutableListOf(Pair("$name\n$dur min | $size MB", uri))) { u ->
-                            val intent = Intent(Intent.ACTION_VIEW)
-                            intent.setDataAndType(u, "video/*")
-                            startActivity(intent)
-                        }
+                if (videos.isNotEmpty()) {
+                    recyclerView.adapter = VideoAdapter(videos) { selectedVideo ->
+                        playVideo(selectedVideo)
                     }
-                }
-            }
-        }
-        class VideoAdapter(val list: MutableList<Pair<String, Uri>>, val onClick: (Uri) -> Unit): RecyclerView.Adapter<VideoAdapter.VH>() {
-            class VH(v: View): RecyclerView.ViewHolder(v) { val t: TextView = v.findViewById(android.R.id.text1) }
-            override fun onCreateViewHolder(p: ViewGroup, t: Int) = VH(LayoutInflater.from(p.context).inflate(android.R.layout.simple_list_item_1, p, false).apply{ findViewById<TextView>(android.R.id.text1).setTextColor(-1) })
-            override fun onBindViewHolder(h: VH, p: Int) { h.t.text = list[p].first; h.itemView.setOnClickListener { onClick(list[p].second) } }
-            override fun getItemCount() = list.size
-        }
-        EOF
-
-    - name: Step 6 - Manifest & Build
-      run: |
-        cat << 'EOF' > app/src/main/AndroidManifest.xml
-        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-            <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-            <application android:icon="@mipmap/ic_launcher" android:label="@string/app_name" android:theme="@style/AppTheme">
-                <activity android:name=".MainActivity" android:exported="true">
-                    <intent-filter><action android:name="android.intent.action.MAIN"/><category android:name="android.intent.category.LAUNCHER"/></intent-filter>
-                </activity>
-                <activity android:name=".VideoListActivity" />
-            </application>
-        </manifest>
-        EOF
-
-        # Gradle Files Generation
-        cat << 'EOF' > app/build.gradle
-        plugins { id 'com.android.application'; id 'org.jetbrains.kotlin.android' }
-        android { 
-            namespace 'com.app.zvedios'; compileSdk 34 
-            defaultConfig { applicationId "com.app.zvedios"; minSdk 24; targetSdk 34; versionCode 1; versionName "1.0" }
-        }
-        dependencies { 
-            implementation 'androidx.core:core-ktx:1.12.0'; implementation 'androidx.appcompat:appcompat:1.6.1'
-            implementation 'com.google.android.material:material:1.11.0'
-        }
-        EOF
-        
-        gradle wrapper
-        ./gradlew assembleDebug
-
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: Zeeshan-Vedios-APK
-        path: app/build/outputs/apk/debug/app-debug.apk
-        
+ 
