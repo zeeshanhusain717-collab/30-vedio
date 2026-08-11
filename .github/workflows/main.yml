@@ -19,11 +19,6 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-      with:
-        gradle-version: '8.2'
-
     - name: Step 1 - Create Project Directories
       run: |
         mkdir -p app/src/main/java/com/app/zvedios
@@ -308,9 +303,8 @@ jobs:
         </manifest>
         EOF
 
-    - name: Step 9 - Kotlin Source Code (MainActivity, VideoListActivity, PlayerActivity)
+    - name: Step 9 - Kotlin Source Code (Fully Completed)
       run: |
-        # MainActivity.kt
         cat << 'EOF' > app/src/main/java/com/app/zvedios/MainActivity.kt
         package com.app.zvedios
 
@@ -414,7 +408,6 @@ jobs:
         }
         EOF
 
-        # VideoListActivity.kt
         cat << 'EOF' > app/src/main/java/com/app/zvedios/VideoListActivity.kt
         package com.app.zvedios
 
@@ -432,4 +425,8 @@ jobs:
         import androidx.recyclerview.widget.RecyclerView
         import java.util.concurrent.TimeUnit
 
-   
+        data class VideoModel(val uri: Uri, val name: String, val sizeStr: String, val timeStr: String)
+
+        class VideoListActivity : AppCompatActivity() {
+
+            private lateinit var rvVideos
