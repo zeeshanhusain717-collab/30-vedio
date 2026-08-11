@@ -1,4 +1,4 @@
-name: Build Z+2 Vedio player App APK 100% Working
+name: Build Advance Zeeshan Video App APK
 
 on:
   push:
@@ -10,470 +10,426 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v4
 
-      - name: Set up JDK 17
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
 
-      - name: Step 1 - Create Project Directories
-        run: |
-          mkdir -p app/src/main/java/com/app/zplus2
-          mkdir -p app/src/main/res/layout
-          mkdir -p app/src/main/res/values
-          mkdir -p app/src/main/res/drawable
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+      with:
+        gradle-version: '8.2'
 
-      - name: Step 2 - Create Gradle Properties
-        run: |
-          cat << 'EOF' > gradle.properties
-          org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
-          android.useAndroidX=true
-          android.enableJetifier=true
-          EOF
+    - name: Step 1 - Create Project Directories
+      run: |
+        mkdir -p app/src/main/java/com/app/zvedios
+        mkdir -p app/src/main/res/layout
+        mkdir -p app/src/main/res/values
+        mkdir -p app/src/main/res/mipmap-anydpi-v26
+        mkdir -p app/src/main/res/drawable
 
-      - name: Step 3 - Create settings.gradle & Root build.gradle
-        run: |
-          cat << 'EOF' > settings.gradle
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = "ZPlus2VideoPlayer"
-          include ':app'
-          EOF
+    - name: Step 2 - Gradle Properties
+      run: |
+        cat << 'EOF' > gradle.properties
+        org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8
+        android.useAndroidX=true
+        android.enableJetifier=true
+        EOF
 
-          cat << 'EOF' > build.gradle
-          plugins {
-              id 'com.android.application' version '8.2.0' apply false
-              id 'org.jetbrains.kotlin.android' version '1.9.20' apply false
-          }
-          EOF
+    - name: Step 3 - Settings & Root Build
+      run: |
+        cat << 'EOF' > settings.gradle
+        pluginManagement {
+            repositories { google(); mavenCentral(); gradlePluginPortal() }
+        }
+        dependencyResolutionManagement {
+            repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+            repositories { google(); mavenCentral() }
+        }
+        rootProject.name = "ZeeshanVedios"
+        include ':app'
+        EOF
+        
+        cat << 'EOF' > build.gradle
+        plugins {
+            id 'com.android.application' version '8.2.0' apply false
+            id 'org.jetbrains.kotlin.android' version '1.9.20' apply false
+        }
+        EOF
 
-      - name: Step 4 - Create App build.gradle
-        run: |
-          cat << 'EOF' > app/build.gradle
-          plugins {
-              id 'com.android.application'
-              id 'org.jetbrains.kotlin.android'
-          }
+    - name: Step 4 - App Level build.gradle
+      run: |
+        cat << 'EOF' > app/build.gradle
+        plugins {
+            id 'com.android.application'
+            id 'org.jetbrains.kotlin.android'
+        }
 
-          android {
-              namespace 'com.app.zplus2'
-              compileSdk 34
+        android {
+            namespace 'com.app.zvedios'
+            compileSdk 34
 
-              defaultConfig {
-                  applicationId "com.app.zplus2"
-                  minSdk 24
-                  targetSdk 34
-                  versionCode 1
-                  versionName "1.0"
-              }
+            defaultConfig {
+                applicationId "com.app.zvedios"
+                minSdk 24
+                targetSdk 34
+                versionCode 1
+                versionName "2.0"
+            }
 
-              compileOptions {
-                  sourceCompatibility JavaVersion.VERSION_17
-                  targetCompatibility JavaVersion.VERSION_17
-              }
-              kotlinOptions {
-                  jvmTarget = '17'
-              }
-          }
+            compileOptions {
+                sourceCompatibility JavaVersion.VERSION_17
+                targetCompatibility JavaVersion.VERSION_17
+            }
+            kotlinOptions {
+                jvmTarget = '17'
+            }
+            buildFeatures {
+                viewBinding true
+            }
+        }
 
-          dependencies {
-              implementation 'androidx.core:core-ktx:1.12.0'
-              implementation 'androidx.appcompat:appcompat:1.6.1'
-              implementation 'com.google.android.material:material:1.11.0'
-              implementation 'androidx.recyclerview:recyclerview:1.3.2'
-              implementation 'androidx.media3:media3-exoplayer:1.2.1'
-              implementation 'androidx.media3:media3-ui:1.2.1'
-          }
-          EOF
+        dependencies {
+            implementation 'androidx.core:core-ktx:1.12.0'
+            implementation 'androidx.appcompat:appcompat:1.6.1'
+            implementation 'com.google.android.material:material:1.11.0'
+            implementation 'androidx.recyclerview:recyclerview:1.3.2'
+            
+            // ExoPlayer Media3
+            implementation 'androidx.media3:media3-exoplayer:1.2.1'
+            implementation 'androidx.media3:media3-ui:1.2.1'
+        }
+        EOF
 
-      - name: Step 5 - Create Resources & Layouts
-        run: |
-          cat << 'EOF' > app/src/main/res/drawable/ic_app_icon.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="512dp"
-              android:height="512dp"
-              android:viewportWidth="512"
-              android:viewportHeight="512">
-              <path android:fillColor="#8B4513" android:pathData="M0,0h512v512h-512z" />
-              <path android:strokeColor="#FFFFFF" android:strokeWidth="48" android:strokeLineCap="square" android:strokeLineJoin="miter" android:pathData="M 160, 160 L 352, 160 L 160, 352 L 352, 352" />
-          </vector>
-          EOF
+    - name: Step 5 - App Values (Strings, Colors, Styles)
+      run: |
+        cat << 'EOF' > app/src/main/res/values/strings.xml
+        <resources>
+            <string name="app_name">Z+2 Vedios</string>
+            <string name="toolbar_title">Zeeshan vedios</string>
+        </resources>
+        EOF
 
-          cat << 'EOF' > app/src/main/res/drawable/ic_folder.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="24dp" android:height="24dp"
-              android:viewportWidth="24" android:viewportHeight="24"
-              android:tint="#8B4513">
-              <path android:fillColor="#8B4513" android:pathData="M10,4H4c-1.1,0 -1.99,0.9 -1.99,2L2,18c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2V8c0,-1.1 -0.9,-2 -2,-2h-8l-2,-2z"/>
-          </vector>
-          EOF
+        cat << 'EOF' > app/src/main/res/values/colors.xml
+        <resources>
+            <color name="colorPrimary">#121212</color>
+            <color name="colorPrimaryDark">#000000</color>
+            <color name="colorAccent">#FFD700</color>
+            <color name="textColor">#FFFFFF</color>
+            <color name="subTextColor">#AAAAAA</color>
+        </resources>
+        EOF
 
-          cat << 'EOF' > app/src/main/res/drawable/ic_video.xml
-          <vector xmlns:android="http://schemas.android.com/apk/res/android"
-              android:width="24dp" android:height="24dp"
-              android:viewportWidth="24" android:viewportHeight="24"
-              android:tint="#8B4513">
-              <path android:fillColor="#8B4513" android:pathData="M18,3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8,17H6v-2h2v2zm0,-4H6v-2h2v2zm0,-4H6V7h2v2zm10,8h-2v-2h2v2zm0,-4h-2v-2h2v2zm0,-4h-2V7h2v2z"/>
-          </vector>
-          EOF
+        cat << 'EOF' > app/src/main/res/values/styles.xml
+        <resources>
+            <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+                <item name="colorPrimary">@color/colorPrimary</item>
+                <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+                <item name="colorAccent">@color/colorAccent</item>
+                <item name="android:statusBarColor">#000000</item>
+            </style>
+            <style name="PlayerTheme" parent="AppTheme">
+                <item name="android:windowFullscreen">true</item>
+            </style>
+        </resources>
+        EOF
 
-          cat << 'EOF' > app/src/main/res/values/styles.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <resources>
-              <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
-                  <item name="colorPrimary">#8B4513</item>
-                  <item name="colorPrimaryDark">#5C2E0B</item>
-                  <item name="colorAccent">#D2691E</item>
-                  <item name="android:statusBarColor">#5C2E0B</item>
-              </style>
-          </resources>
-          EOF
+    - name: Step 6 - Vector Logo & Launcher Icons
+      run: |
+        cat << 'EOF' > app/src/main/res/drawable/ic_z_logo.xml
+        <vector xmlns:android="http://schemas.android.com/apk/res/android"
+            android:width="108dp" android:height="108dp"
+            android:viewportWidth="100" android:viewportHeight="100">
+            <path android:fillColor="#FFD700" 
+                  android:pathData="M 50,5 C 25.15,5 5,25.15 5,50 C 5,74.85 25.15,95 50,95 C 74.85,95 95,74.85 95,50 C 95,25.15 74.85,5 50,5 Z" />
+            <path android:fillColor="#D2691E" 
+                  android:pathData="M 27,32 L 77,32 L 77,44 L 42,77 L 77,77 L 77,87 L 22,87 L 22,75 L 57,42 L 27,42 Z" />
+            <path android:fillColor="#0000FF" 
+                  android:pathData="M 23,28 L 73,28 L 73,40 L 38,73 L 73,73 L 73,83 L 18,83 L 18,71 L 53,38 L 23,38 Z" />
+            <path android:fillColor="#FFFFFF" 
+                  android:pathData="M 23,28 L 73,28 L 73,33 L 23,33 Z" />
+            <path android:fillColor="#FFFFFF" 
+                  android:pathData="M 18,83 L 73,83 L 73,78 L 18,78 Z" />
+            <path android:fillColor="#FFFFFF" 
+                  android:pathData="M 30,88 L 70,88 L 70,91 L 30,91 Z" />
+        </vector>
+        EOF
 
-          cat << 'EOF' > app/src/main/res/layout/activity_main.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical"
-              android:background="#F5F5F5">
+        cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+            <background android:drawable="@color/colorPrimaryDark"/>
+            <foreground android:drawable="@drawable/ic_z_logo"/>
+        </adaptive-icon>
+        EOF
 
-              <RelativeLayout
-                  android:id="@+id/headerBar"
-                  android:layout_width="match_parent"
-                  android:layout_height="56dp"
-                  android:background="#8B4513"
-                  android:paddingStart="16dp"
-                  android:paddingEnd="16dp">
+        cat << 'EOF' > app/src/main/res/mipmap-anydpi-v26/ic_launcher_round.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+            <background android:drawable="@color/colorPrimaryDark"/>
+            <foreground android:drawable="@drawable/ic_z_logo"/>
+        </adaptive-icon>
+        EOF
 
-                  <TextView
-                      android:id="@+id/tvHeaderTitle"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_centerVertical="true"
-                      android:text="Zeeshan vedio"
-                      android:textColor="#FFFFFF"
-                      android:textSize="22sp"
-                      android:textStyle="bold" />
-              </RelativeLayout>
+    - name: Step 7 - Layouts Creation
+      run: |
+        cat << 'EOF' > app/src/main/res/layout/activity_main.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:orientation="vertical" android:background="#121212">
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbar" android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize" android:background="#1F1F1F">
+                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                    android:text="@string/toolbar_title" android:textColor="#FFD700"
+                    android:textSize="20sp" android:textStyle="bold" />
+            </androidx.appcompat.widget.Toolbar>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvFolders" android:layout_width="match_parent"
+                android:layout_height="match_parent" android:padding="8dp" />
+        </LinearLayout>
+        EOF
 
-              <androidx.media3.ui.PlayerView
-                  android:id="@+id/playerView"
-                  android:layout_width="match_parent"
-                  android:layout_height="220dp"
-                  android:background="#000000"
-                  android:visibility="gone" />
+        cat << 'EOF' > app/src/main/res/layout/activity_video_list.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:orientation="vertical" android:background="#121212">
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/toolbarVideo" android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize" android:background="#1F1F1F">
+                <TextView android:id="@+id/tvFolderTitle" android:layout_width="wrap_content" 
+                    android:layout_height="wrap_content" android:textColor="#FFD700"
+                    android:textSize="18sp" android:textStyle="bold" />
+            </androidx.appcompat.widget.Toolbar>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvVideos" android:layout_width="match_parent"
+                android:layout_height="match_parent" android:padding="8dp" />
+        </LinearLayout>
+        EOF
 
-              <androidx.recyclerview.widget.RecyclerView
-                  android:id="@+id/recyclerView"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:padding="8dp" />
-          </LinearLayout>
-          EOF
+        cat << 'EOF' > app/src/main/res/layout/item_folder.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:padding="16dp"
+            android:layout_marginBottom="8dp" android:background="#1E1E1E"
+            android:gravity="center_vertical">
+            <ImageView android:layout_width="48dp" android:layout_height="48dp"
+                android:src="@android:drawable/ic_menu_gallery"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginStart="16dp">
+                <TextView android:id="@+id/tvFolderName" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                    android:textSize="18sp" android:textStyle="bold" />
+                <TextView android:id="@+id/tvVideoCount" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textColor="#AAAAAA"
+                    android:textSize="14sp" android:layout_marginTop="4dp" />
+            </LinearLayout>
+        </LinearLayout>
+        EOF
 
-          cat << 'EOF' > app/src/main/res/layout/item_folder.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="horizontal"
-              android:padding="16dp"
-              android:layout_marginBottom="8dp"
-              android:gravity="center_vertical"
-              android:background="#FFFFFF"
-              android:elevation="2dp">
+        cat << 'EOF' > app/src/main/res/layout/item_video.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:orientation="horizontal" android:padding="12dp"
+            android:layout_marginBottom="6dp" android:background="#1E1E1E"
+            android:gravity="center_vertical">
+            <ImageView android:layout_width="48dp" android:layout_height="48dp"
+                android:src="@android:drawable/ic_media_play"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="vertical" android:layout_marginStart="12dp">
+                <TextView android:id="@+id/tvVideoName" android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" android:textColor="#FFFFFF"
+                    android:textSize="16sp" android:maxLines="2" android:ellipsize="end" />
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:layout_marginTop="6dp">
+                    <TextView android:id="@+id/tvVideoTime" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:textColor="#FFD700"
+                        android:textSize="12sp" android:textStyle="bold" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:text="  •  " android:textColor="#555555" />
+                    <TextView android:id="@+id/tvVideoSize" android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" android:textColor="#D2691E"
+                        android:textSize="12sp" android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+        EOF
 
-              <ImageView
-                  android:layout_width="40dp"
-                  android:layout_height="40dp"
-                  android:src="@drawable/ic_folder" />
+        cat << 'EOF' > app/src/main/res/layout/activity_player.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="match_parent" android:layout_height="match_parent"
+            android:background="#000000">
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/exoplayerView" android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </RelativeLayout>
+        EOF
 
-              <LinearLayout
-                  android:layout_width="0dp"
-                  android:layout_weight="1"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical"
-                  android:layout_marginStart="16dp">
+    - name: Step 8 - AndroidManifest.xml
+      run: |
+        cat << 'EOF' > app/src/main/AndroidManifest.xml
+        <?xml version="1.0" encoding="utf-8"?>
+        <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+            <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
+            <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
 
-                  <TextView
-                      android:id="@+id/tvFolderName"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:textColor="#8B4513"
-                      android:textSize="18sp"
-                      android:textStyle="bold"
-                      android:maxLines="1"
-                      android:ellipsize="end" />
+            <application
+                android:allowBackup="true"
+                android:icon="@mipmap/ic_launcher"
+                android:label="@string/app_name"
+                android:roundIcon="@mipmap/ic_launcher_round"
+                android:supportsRtl="true"
+                android:theme="@style/AppTheme">
+                
+                <activity android:name=".MainActivity" android:exported="true">
+                    <intent-filter>
+                        <action android:name="android.intent.action.MAIN" />
+                        <category android:name="android.intent.category.LAUNCHER" />
+                    </intent-filter>
+                </activity>
+                
+                <activity android:name=".VideoListActivity" android:exported="false" />
+                
+                <activity android:name=".PlayerActivity" 
+                    android:exported="false"
+                    android:configChanges="orientation|screenSize|keyboardHidden|smallestScreenSize"
+                    android:theme="@style/PlayerTheme"
+                    android:screenOrientation="fullSensor" />
+            </application>
+        </manifest>
+        EOF
 
-                  <TextView
-                      android:id="@+id/tvVideoCount"
-                      android:layout_width="match_parent"
-                      android:layout_height="wrap_content"
-                      android:textColor="#757575"
-                      android:textSize="14sp"
-                      android:layout_marginTop="4dp" />
-              </LinearLayout>
-          </LinearLayout>
-          EOF
+    - name: Step 9 - Kotlin Source Code (MainActivity, VideoListActivity, PlayerActivity)
+      run: |
+        # MainActivity.kt
+        cat << 'EOF' > app/src/main/java/com/app/zvedios/MainActivity.kt
+        package com.app.zvedios
 
-          cat << 'EOF' > app/src/main/res/layout/item_video.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:orientation="horizontal"
-              android:padding="16dp"
-              android:layout_marginBottom="8dp"
-              android:gravity="center_vertical"
-              android:background="#FFFFFF"
-              android:elevation="2dp">
+        import android.Manifest
+        import android.content.Intent
+        import android.content.pm.PackageManager
+        import android.os.Build
+        import android.os.Bundle
+        import android.provider.MediaStore
+        import android.view.LayoutInflater
+        import android.view.View
+        import android.view.ViewGroup
+        import android.widget.TextView
+        import android.widget.Toast
+        import androidx.appcompat.app.AppCompatActivity
+        import androidx.core.app.ActivityCompat
+        import androidx.core.content.ContextCompat
+        import androidx.recyclerview.widget.LinearLayoutManager
+        import androidx.recyclerview.widget.RecyclerView
 
-              <ImageView
-                  android:layout_width="36dp"
-                  android:layout_height="36dp"
-                  android:src="@drawable/ic_video" />
+        data class FolderModel(val bucketId: String, val folderName: String, var videoCount: Int)
 
-              <TextView
-                  android:id="@+id/tvTitle"
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:layout_marginStart="16dp"
-                  android:textColor="#8B4513"
-                  android:textSize="16sp"
-                  android:textStyle="bold"
-                  android:maxLines="2"
-                  android:ellipsize="end" />
-          </LinearLayout>
-          EOF
+        class MainActivity : AppCompatActivity() {
 
-      - name: Step 6 - Create AndroidManifest.xml
-        run: |
-          cat << 'EOF' > app/src/main/AndroidManifest.xml
-          <?xml version="1.0" encoding="utf-8"?>
-          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
-              <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+            private lateinit var rvFolders: RecyclerView
+            private val PERMISSION_REQ = 101
 
-              <application
-                  android:allowBackup="true"
-                  android:icon="@drawable/ic_app_icon"
-                  android:roundIcon="@drawable/ic_app_icon"
-                  android:label="Z+2 Vedio player"
-                  android:supportsRtl="true"
-                  android:theme="@style/AppTheme">
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true"
-                      android:configChanges="orientation|screenSize|keyboardHidden">
-                      <intent-filter>
-                          <action android:name="android.intent.action.MAIN" />
-                          <category android:name="android.intent.category.LAUNCHER" />
-                      </intent-filter>
-                  </activity>
-              </application>
-          </manifest>
-          EOF
+            override fun onCreate(savedInstanceState: Bundle?) {
+                super.onCreate(savedInstanceState)
+                setContentView(R.layout.activity_main)
 
-      - name: Step 7 - Create Complete Kotlin Source Code
-        run: |
-          cat << 'EOF' > app/src/main/java/com/app/zplus2/MainActivity.kt
-          package com.app.zplus2
+                rvFolders = findViewById(R.id.rvFolders)
+                rvFolders.layoutManager = LinearLayoutManager(this)
 
-          import android.Manifest
-          import android.content.ContentUris
-          import android.content.pm.PackageManager
-          import android.net.Uri
-          import android.os.Build
-          import android.os.Bundle
-          import android.provider.MediaStore
-          import android.view.LayoutInflater
-          import android.view.View
-          import android.view.ViewGroup
-          import android.widget.TextView
-          import android.widget.Toast
-          import androidx.activity.OnBackPressedCallback
-          import androidx.appcompat.app.AppCompatActivity
-          import androidx.core.app.ActivityCompat
-          import androidx.core.content.ContextCompat
-          import androidx.media3.common.MediaItem
-          import androidx.media3.exoplayer.ExoPlayer
-          import androidx.media3.ui.PlayerView
-          import androidx.recyclerview.widget.LinearLayoutManager
-          import androidx.recyclerview.widget.RecyclerView
+                checkPermissions()
+            }
 
-          data class VideoModel(val id: Long, val name: String, val uri: Uri, val folderName: String)
-          data class FolderModel(val folderName: String, val videos: List<VideoModel>)
+            private fun checkPermissions() {
+                val p = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Manifest.permission.READ_MEDIA_VIDEO
+                } else {
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                }
+                if (ContextCompat.checkSelfPermission(this, p) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(this, arrayOf(p), PERMISSION_REQ)
+                } else {
+                    loadFolders()
+                }
+            }
 
-          class MainActivity : AppCompatActivity() {
+            override fun onRequestPermissionsResult(rc: Int, p: Array<out String>, gr: IntArray) {
+                super.onRequestPermissionsResult(rc, p, gr)
+                if (rc == PERMISSION_REQ && gr.isNotEmpty() && gr[0] == PackageManager.PERMISSION_GRANTED) {
+                    loadFolders()
+                } else {
+                    Toast.makeText(this, "Permission Denied!", Toast.LENGTH_SHORT).show()
+                }
+            }
 
-              private var player: ExoPlayer? = null
-              private lateinit var playerView: PlayerView
-              private lateinit var recyclerView: RecyclerView
-              private lateinit var tvHeaderTitle: TextView
-              private val PERMISSION_REQ_CODE = 101
+            private fun loadFolders() {
+                val folderMap = mutableMapOf<String, FolderModel>()
+                val proj = arrayOf(MediaStore.Video.Media.BUCKET_ID, MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
+                
+                contentResolver.query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, proj, null, null, null)?.use { cursor ->
+                    val bIdCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_ID)
+                    val bNameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
+                    while (cursor.moveToNext()) {
+                        val id = cursor.getString(bIdCol) ?: continue
+                        val name = cursor.getString(bNameCol) ?: "Internal Storage"
+                        
+                        if (folderMap.containsKey(id)) {
+                            folderMap[id]!!.videoCount++
+                        } else {
+                            folderMap[id] = FolderModel(id, name, 1)
+                        }
+                    }
+                }
+                val folders = folderMap.values.toList().sortedBy { it.folderName }
+                rvFolders.adapter = FolderAdapter(folders) { selectedFolder ->
+                    val intent = Intent(this, VideoListActivity::class.java)
+                    intent.putExtra("BUCKET_ID", selectedFolder.bucketId)
+                    intent.putExtra("FOLDER_NAME", selectedFolder.folderName)
+                    startActivity(intent)
+                }
+            }
 
-              private var allFolders = listOf<FolderModel>()
-              private var currentFolder: FolderModel? = null
+            inner class FolderAdapter(private val list: List<FolderModel>, private val onClick: (FolderModel) -> Unit) : RecyclerView.Adapter<FolderAdapter.VH>() {
+                inner class VH(v: View) : RecyclerView.ViewHolder(v) {
+                    val tvName: TextView = v.findViewById(R.id.tvFolderName)
+                    val tvCount: TextView = v.findViewById(R.id.tvVideoCount)
+                }
+                override fun onCreateViewHolder(p: ViewGroup, type: Int) = VH(LayoutInflater.from(p.context).inflate(R.layout.item_folder, p, false))
+                override fun onBindViewHolder(h: VH, pos: Int) {
+                    val item = list[pos]
+                    h.tvName.text = item.folderName
+                    h.tvCount.text = "${item.videoCount} Videos"
+                    h.itemView.setOnClickListener { onClick(item) }
+                }
+                override fun getItemCount() = list.size
+            }
+        }
+        EOF
 
-              override fun onCreate(savedInstanceState: Bundle?) {
-                  super.onCreate(savedInstanceState)
-                  setContentView(R.layout.activity_main)
+        # VideoListActivity.kt
+        cat << 'EOF' > app/src/main/java/com/app/zvedios/VideoListActivity.kt
+        package com.app.zvedios
 
-                  tvHeaderTitle = findViewById(R.id.tvHeaderTitle)
-                  playerView = findViewById(R.id.playerView)
-                  recyclerView = findViewById(R.id.recyclerView)
-                  recyclerView.layoutManager = LinearLayoutManager(this)
+        import android.content.ContentUris
+        import android.content.Intent
+        import android.net.Uri
+        import android.os.Bundle
+        import android.provider.MediaStore
+        import android.view.LayoutInflater
+        import android.view.View
+        import android.view.ViewGroup
+        import android.widget.TextView
+        import androidx.appcompat.app.AppCompatActivity
+        import androidx.recyclerview.widget.LinearLayoutManager
+        import androidx.recyclerview.widget.RecyclerView
+        import java.util.concurrent.TimeUnit
 
-                  initializePlayer()
-                  checkAndRequestPermissions()
-
-                  onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-                      override fun handleOnBackPressed() {
-                          if (currentFolder != null) {
-                              showFoldersList()
-                          } else {
-                              isEnabled = false
-                              onBackPressedDispatcher.onBackPressed()
-                          }
-                      }
-                  })
-              }
-
-              private fun initializePlayer() {
-                  player = ExoPlayer.Builder(this).build()
-                  playerView.player = player
-              }
-
-              private fun checkAndRequestPermissions() {
-                  val permission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                      Manifest.permission.READ_MEDIA_VIDEO
-                  } else {
-                      Manifest.permission.READ_EXTERNAL_STORAGE
-                  }
-
-                  if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-                      ActivityCompat.requestPermissions(this, arrayOf(permission), PERMISSION_REQ_CODE)
-                  } else {
-                      scanAndDisplayContent()
-                  }
-              }
-
-              override fun onRequestPermissionsResult(
-                  requestCode: Int,
-                  permissions: Array<out String>,
-                  grantResults: IntArray
-              ) {
-                  super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-                  if (requestCode == PERMISSION_REQ_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                      scanAndDisplayContent()
-                  } else {
-                      Toast.makeText(this, "Permission Required!", Toast.LENGTH_LONG).show()
-                  }
-              }
-
-              private fun scanAndDisplayContent() {
-                  val folderMap = mutableMapOf<String, MutableList<VideoModel>>()
-                  val projection = arrayOf(
-                      MediaStore.Video.Media._ID,
-                      MediaStore.Video.Media.DISPLAY_NAME,
-                      MediaStore.Video.Media.BUCKET_DISPLAY_NAME
-                  )
-
-                  contentResolver.query(
-                      MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
-                      projection, null, null, MediaStore.Video.Media.DATE_ADDED + " DESC"
-                  )?.use { cursor ->
-                      val idCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID)
-                      val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME)
-                      val bucketCol = cursor.getColumnIndex(MediaStore.Video.Media.BUCKET_DISPLAY_NAME)
-
-                      while (cursor.moveToNext()) {
-                          val id = cursor.getLong(idCol)
-                          val name = cursor.getString(nameCol) ?: "Unknown Video"
-                          val folderName = if (bucketCol != -1) cursor.getString(bucketCol) ?: "Videos" else "Videos"
-                          val contentUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, id)
-
-                          val video = VideoModel(id, name, contentUri, folderName)
-                          folderMap.getOrPut(folderName) { mutableListOf() }.add(video)
-                      }
-                  }
-
-                  allFolders = folderMap.map { FolderModel(it.key, it.value) }
-
-                  if (allFolders.isNotEmpty()) {
-                      showFoldersList()
-                  } else {
-                      Toast.makeText(this, "No Videos Found!", Toast.LENGTH_SHORT).show()
-                  }
-              }
-
-              private fun showFoldersList() {
-                  currentFolder = null
-                  tvHeaderTitle.text = "Zeeshan vedio"
-                  playerView.visibility = View.GONE
-                  recyclerView.adapter = FolderAdapter(allFolders) { selectedFolder ->
-                      showVideosList(selectedFolder)
-                  }
-              }
-
-              private fun showVideosList(folder: FolderModel) {
-                  currentFolder = folder
-                  tvHeaderTitle.text = folder.folderName
-                  playerView.visibility = View.VISIBLE
-                  recyclerView.adapter = VideoAdapter(folder.videos) { selectedVideo ->
-                      playVideo(selectedVideo)
-                  }
-              }
-
-              private fun playVideo(video: VideoModel) {
-                  val mediaItem = MediaItem.fromUri(video.uri)
-                  player?.setMediaItem(mediaItem)
-                  player?.prepare()
-                  player?.playWhenReady = true
-              }
-
-              override fun onStop() {
-                  super.onStop()
-                  player?.pause()
-              }
-
-              override fun onDestroy() {
-                  super.onDestroy()
-                  player?.release()
-                  player = null
-              }
-
-              inner class FolderAdapter(
-                  private val list: List<FolderModel>,
-                  private val onClick: (FolderModel) -> Unit
-              ) : RecyclerView.Adapter<FolderAdapter.ViewHolder>() {
-
-                  inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-                      val tvFolderName: TextView = v.findViewById(R.id.tvFolderName)
-                      val tvVideoCount: TextView = v.findViewById(R.id.tvVideoCount)
-                  }
-
-                  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                      val v = LayoutInflater.from(parent.context).inflate(R.layout.item_folder, parent, false)
-                      return ViewHolder(v)
-                  }
-
-                  override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                      val item = list[position]
-                      holder.tvFolderName.text = item.folderName
-                      holder.tvVid
+   
