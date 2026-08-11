@@ -19,7 +19,7 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Step 1 - Create Project Folders
+      - name: Step 1 - Create Project Directories
         run: |
           mkdir -p app/src/main/java/com/app/zplus2
           mkdir -p app/src/main/res/layout
@@ -51,10 +51,10 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "Z+2 Vedio player"
+          rootProject.name = "ZPlus2VideoPlayer"
           include ':app'
           EOF
-          
+
           cat << 'EOF' > build.gradle
           plugins {
               id 'com.android.application' version '8.2.0' apply false
@@ -62,7 +62,7 @@ jobs:
           }
           EOF
 
-      - name: Step 4 - Create App Level build.gradle
+      - name: Step 4 - Create App build.gradle
         run: |
           cat << 'EOF' > app/build.gradle
           plugins {
@@ -96,16 +96,13 @@ jobs:
               implementation 'androidx.appcompat:appcompat:1.6.1'
               implementation 'com.google.android.material:material:1.11.0'
               implementation 'androidx.recyclerview:recyclerview:1.3.2'
-              
-              // Google Media3 / ExoPlayer Video Engine
               implementation 'androidx.media3:media3-exoplayer:1.2.1'
               implementation 'androidx.media3:media3-ui:1.2.1'
           }
           EOF
 
-      - name: Step 5 - Create App Resources (UI, Layouts & Icons)
+      - name: Step 5 - Create Resources & Layouts
         run: |
-          # App Icon Vector
           cat << 'EOF' > app/src/main/res/drawable/ic_app_icon.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="512dp"
@@ -116,8 +113,7 @@ jobs:
               <path android:strokeColor="#FFFFFF" android:strokeWidth="48" android:strokeLineCap="square" android:strokeLineJoin="miter" android:pathData="M 160, 160 L 352, 160 L 160, 352 L 352, 352" />
           </vector>
           EOF
-          
-          # Chocolate Folder Icon
+
           cat << 'EOF' > app/src/main/res/drawable/ic_folder.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="24dp" android:height="24dp"
@@ -126,8 +122,7 @@ jobs:
               <path android:fillColor="#8B4513" android:pathData="M10,4H4c-1.1,0 -1.99,0.9 -1.99,2L2,18c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2V8c0,-1.1 -0.9,-2 -2,-2h-8l-2,-2z"/>
           </vector>
           EOF
-          
-          # Chocolate Video Icon
+
           cat << 'EOF' > app/src/main/res/drawable/ic_video.xml
           <vector xmlns:android="http://schemas.android.com/apk/res/android"
               android:width="24dp" android:height="24dp"
@@ -137,7 +132,6 @@ jobs:
           </vector>
           EOF
 
-          # Styles (Light Theme setup)
           cat << 'EOF' > app/src/main/res/values/styles.xml
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
@@ -149,8 +143,7 @@ jobs:
               </style>
           </resources>
           EOF
-          
-          # Activity Main with Chocolate Header Bar
+
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -159,7 +152,6 @@ jobs:
               android:orientation="vertical"
               android:background="#F5F5F5">
 
-              <!-- Top Header Bar (चाकलेटी पट्टी) -->
               <RelativeLayout
                   android:id="@+id/headerBar"
                   android:layout_width="match_parent"
@@ -179,14 +171,13 @@ jobs:
                       android:textStyle="bold" />
               </RelativeLayout>
 
-              <!-- Video Player -->
               <androidx.media3.ui.PlayerView
                   android:id="@+id/playerView"
                   android:layout_width="match_parent"
                   android:layout_height="220dp"
-                  android:background="#000000" />
+                  android:background="#000000"
+                  android:visibility="gone" />
 
-              <!-- Folders / Videos List -->
               <androidx.recyclerview.widget.RecyclerView
                   android:id="@+id/recyclerView"
                   android:layout_width="match_parent"
@@ -195,7 +186,6 @@ jobs:
           </LinearLayout>
           EOF
 
-          # Item Folder Layout (White Background, Chocolate Text & Icon)
           cat << 'EOF' > app/src/main/res/layout/item_folder.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -240,8 +230,7 @@ jobs:
               </LinearLayout>
           </LinearLayout>
           EOF
-          
-          # Item Video Layout (White Background, Chocolate Text)
+
           cat << 'EOF' > app/src/main/res/layout/item_video.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -300,7 +289,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: Step 7 - Create Kotlin Code
+      - name: Step 7 - Create Complete Kotlin Source Code
         run: |
           cat << 'EOF' > app/src/main/java/com/app/zplus2/MainActivity.kt
           package com.app.zplus2
@@ -476,4 +465,15 @@ jobs:
 
                   inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
                       val tvFolderName: TextView = v.findViewById(R.id.tvFolderName)
-                      val tvVideoCount: TextView = v.findViewById(R.id.tvV
+                      val tvVideoCount: TextView = v.findViewById(R.id.tvVideoCount)
+                  }
+
+                  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+                      val v = LayoutInflater.from(parent.context).inflate(R.layout.item_folder, parent, false)
+                      return ViewHolder(v)
+                  }
+
+                  override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+                      val item = list[position]
+                      holder.tvFolderName.text = item.folderName
+                      holder.tvVid
