@@ -105,7 +105,7 @@ jobs:
           }
           EOF
 
-      - name: Step 5 - Create App Resources (UI, Layouts & Icon)
+      - name: Step 5 - Create App Resources (UI, Layouts & Icons)
         run: |
           # App Icon Vector
           cat << 'EOF' > app/src/main/res/drawable/ic_app_icon.xml
@@ -114,46 +114,59 @@ jobs:
               android:height="512dp"
               android:viewportWidth="512"
               android:viewportHeight="512">
-              <path
-                  android:fillColor="#FFFFFF"
-                  android:pathData="M0,0h512v512h-512z" />
-              <path
-                  android:strokeColor="#4E342E"
-                  android:strokeWidth="24"
-                  android:pathData="M 256, 44 A 212, 212 0 1,0 256, 468 A 212, 212 0 1,0 256, 44 Z" />
-              <path
-                  android:strokeColor="#4E342E"
-                  android:strokeWidth="48"
-                  android:strokeLineCap="square"
-                  android:strokeLineJoin="miter"
-                  android:pathData="M 160, 160 L 352, 160 L 160, 352 L 352, 352" />
+              <path android:fillColor="#8B4513" android:pathData="M0,0h512v512h-512z" />
+              <path android:strokeColor="#FFFFFF" android:strokeWidth="48" android:strokeLineCap="square" android:strokeLineJoin="miter" android:pathData="M 160, 160 L 352, 160 L 160, 352 L 352, 352" />
+          </vector>
+          EOF
+          
+          # Chocolate Folder Icon
+          cat << 'EOF' > app/src/main/res/drawable/ic_folder.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp" android:height="24dp"
+              android:viewportWidth="24" android:viewportHeight="24"
+              android:tint="#8B4513">
+              <path android:fillColor="#8B4513" android:pathData="M10,4H4c-1.1,0 -1.99,0.9 -1.99,2L2,18c0,1.1 0.9,2 2,2h16c1.1,0 2,-0.9 2,-2V8c0,-1.1 -0.9,-2 -2,-2h-8l-2,-2z"/>
+          </vector>
+          EOF
+          
+          # Chocolate Video Icon
+          cat << 'EOF' > app/src/main/res/drawable/ic_video.xml
+          <vector xmlns:android="http://schemas.android.com/apk/res/android"
+              android:width="24dp" android:height="24dp"
+              android:viewportWidth="24" android:viewportHeight="24"
+              android:tint="#8B4513">
+              <path android:fillColor="#8B4513" android:pathData="M18,3v2h-2V3H8v2H6V3H4v18h2v-2h2v2h8v-2h2v2h2V3h-2zM8,17H6v-2h2v2zm0,-4H6v-2h2v2zm0,-4H6V7h2v2zm10,8h-2v-2h2v2zm0,-4h-2v-2h2v2zm0,-4h-2V7h2v2z"/>
           </vector>
           EOF
 
+          # Styles (Light Theme setup)
           cat << 'EOF' > app/src/main/res/values/styles.xml
           <?xml version="1.0" encoding="utf-8"?>
           <resources>
-              <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-                  <item name="colorPrimary">#4E342E</item>
+              <style name="AppTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+                  <item name="colorPrimary">#8B4513</item>
+                  <item name="colorPrimaryDark">#5C2E0B</item>
+                  <item name="colorAccent">#D2691E</item>
+                  <item name="android:statusBarColor">#5C2E0B</item>
               </style>
           </resources>
           EOF
           
-          # Activity Main with Top Chocolate Header Bar
+          # Activity Main with Chocolate Header Bar
           cat << 'EOF' > app/src/main/res/layout/activity_main.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="match_parent"
               android:orientation="vertical"
-              android:background="#121212">
+              android:background="#F5F5F5">
 
               <!-- Top Header Bar (चाकलेटी पट्टी) -->
               <RelativeLayout
                   android:id="@+id/headerBar"
                   android:layout_width="match_parent"
                   android:layout_height="56dp"
-                  android:background="#4E342E"
+                  android:background="#8B4513"
                   android:paddingStart="16dp"
                   android:paddingEnd="16dp">
 
@@ -164,7 +177,7 @@ jobs:
                       android:layout_centerVertical="true"
                       android:text="Zeeshan vedio"
                       android:textColor="#FFFFFF"
-                      android:textSize="20sp"
+                      android:textSize="22sp"
                       android:textStyle="bold" />
               </RelativeLayout>
 
@@ -184,37 +197,37 @@ jobs:
           </LinearLayout>
           EOF
 
-          # Item Folder Layout
+          # Item Folder Layout (White Background, Chocolate Text & Icon)
           cat << 'EOF' > app/src/main/res/layout/item_folder.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:orientation="horizontal"
-              android:padding="14dp"
-              android:layout_marginBottom="6dp"
+              android:padding="16dp"
+              android:layout_marginBottom="8dp"
               android:gravity="center_vertical"
-              android:background="#1E1E1E">
+              android:background="#FFFFFF"
+              android:elevation="2dp">
 
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="📁"
-                  android:textSize="22sp" />
+              <ImageView
+                  android:layout_width="40dp"
+                  android:layout_height="40dp"
+                  android:src="@drawable/ic_folder" />
 
               <LinearLayout
                   android:layout_width="0dp"
                   android:layout_weight="1"
                   android:layout_height="wrap_content"
                   android:orientation="vertical"
-                  android:layout_marginStart="12dp">
+                  android:layout_marginStart="16dp">
 
                   <TextView
                       android:id="@+id/tvFolderName"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:textColor="#FFFFFF"
-                      android:textSize="16sp"
+                      android:textColor="#8B4513"
+                      android:textSize="18sp"
                       android:textStyle="bold"
                       android:maxLines="1"
                       android:ellipsize="end" />
@@ -223,40 +236,40 @@ jobs:
                       android:id="@+id/tvVideoCount"
                       android:layout_width="match_parent"
                       android:layout_height="wrap_content"
-                      android:textColor="#B0B0B0"
-                      android:textSize="12sp"
-                      android:layout_marginTop="2dp" />
+                      android:textColor="#757575"
+                      android:textSize="14sp"
+                      android:layout_marginTop="4dp" />
               </LinearLayout>
           </LinearLayout>
           EOF
           
-          # Item Video Layout
+          # Item Video Layout (White Background, Chocolate Text)
           cat << 'EOF' > app/src/main/res/layout/item_video.xml
           <?xml version="1.0" encoding="utf-8"?>
           <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:orientation="horizontal"
-              android:padding="12dp"
-              android:layout_marginBottom="6dp"
+              android:padding="16dp"
+              android:layout_marginBottom="8dp"
               android:gravity="center_vertical"
-              android:background="#1E1E1E">
+              android:background="#FFFFFF"
+              android:elevation="2dp">
 
-              <TextView
-                  android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:text="🎬"
-                  android:textSize="18sp" />
+              <ImageView
+                  android:layout_width="36dp"
+                  android:layout_height="36dp"
+                  android:src="@drawable/ic_video" />
 
               <TextView
                   android:id="@+id/tvTitle"
                   android:layout_width="match_parent"
                   android:layout_height="wrap_content"
-                  android:layout_marginStart="10dp"
-                  android:textColor="#FFFFFF"
-                  android:textSize="15sp"
+                  android:layout_marginStart="16dp"
+                  android:textColor="#8B4513"
+                  android:textSize="16sp"
                   android:textStyle="bold"
-                  android:maxLines="1"
+                  android:maxLines="2"
                   android:ellipsize="end" />
           </LinearLayout>
           EOF
@@ -342,7 +355,7 @@ jobs:
                   initializePlayer()
                   checkAndRequestPermissions()
 
-                  // Back gesture logic to navigate from videos to folder list
+                  // Back gesture logic
                   onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
                       override fun handleOnBackPressed() {
                           if (currentFolder != null) {
@@ -383,7 +396,7 @@ jobs:
                   if (requestCode == PERMISSION_REQ_CODE && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                       scanAndDisplayContent()
                   } else {
-                      Toast.makeText(this, "वीडियो देखने के लिए परमिशन ज़रूरी है!", Toast.LENGTH_LONG).show()
+                      Toast.makeText(this, "Permission Required!", Toast.LENGTH_LONG).show()
                   }
               }
 
@@ -419,13 +432,14 @@ jobs:
                   if (allFolders.isNotEmpty()) {
                       showFoldersList()
                   } else {
-                      Toast.makeText(this, "मोबाइल में कोई वीडियो नहीं मिला!", Toast.LENGTH_SHORT).show()
+                      Toast.makeText(this, "No Videos Found!", Toast.LENGTH_SHORT).show()
                   }
               }
 
               private fun showFoldersList() {
                   currentFolder = null
                   tvHeaderTitle.text = "Zeeshan vedio"
+                  playerView.visibility = View.GONE
                   recyclerView.adapter = FolderAdapter(allFolders) { selectedFolder ->
                       showVideosList(selectedFolder)
                   }
@@ -434,6 +448,7 @@ jobs:
               private fun showVideosList(folder: FolderModel) {
                   currentFolder = folder
                   tvHeaderTitle.text = folder.folderName
+                  playerView.visibility = View.VISIBLE
                   recyclerView.adapter = VideoAdapter(folder.videos) { selectedVideo ->
                       playVideo(selectedVideo)
                   }
@@ -464,27 +479,4 @@ jobs:
               ) : RecyclerView.Adapter<FolderAdapter.ViewHolder>() {
 
                   inner class ViewHolder(v: View) : RecyclerView.ViewHolder(v) {
-                      val tvFolderName: TextView = v.findViewById(R.id.tvFolderName)
-                      val tvVideoCount: TextView = v.findViewById(R.id.tvVideoCount)
-                  }
-
-                  override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-                      val v = LayoutInflater.from(parent.context).inflate(R.layout.item_folder, parent, false)
-                      return ViewHolder(v)
-                  }
-
-                  override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-                      val item = list[position]
-                      holder.tvFolderName.text = item.folderName
-                      holder.tvVideoCount.text = "${item.videos.size} Videos"
-                      holder.itemView.setOnClickListener { onClick(item) }
-                  }
-
-                  override fun getItemCount() = list.size
-              }
-
-              // Video Adapter
-              inner class VideoAdapter(
-                  private val list: List<VideoModel>,
-                  private val onClick: (VideoModel) -> Unit
-              ) : RecyclerView.Adapter<VideoAdapter
+  
