@@ -95,7 +95,7 @@ jobs:
       # ==========================================
       # STEP 4: C++ Native Storage Engine Setup
       # ==========================================
-      - name: "Robot Step 10: Create C++ Native Code for 100GB App Server Storage Calculation"
+      - name: "Robot Step 10: Create C++ Native Code for App Server Storage Calculation"
         run: |
           cat > app/src/main/cpp/native-lib.cpp <<'EOF'
           #include <jni.h>
@@ -114,7 +114,8 @@ jobs:
 
                   std::string fullPath = std::string(dirPath) + "/" + entry->d_name;
                   struct stat statbuf;
-                  if (stat(fullPath.c_str(), &statbuf) == 0) {
+                  // FIX 3: lstat prevents infinite recursion due to symlinks
+                  if (lstat(fullPath.c_str(), &statbuf) == 0) {
                       if (S_ISDIR(statbuf.st_mode)) {
                           totalSize += calculateDirectorySize(fullPath.c_str());
                       } else {
@@ -143,6 +144,7 @@ jobs:
           project("notice")
           add_library(native-lib SHARED native-lib.cpp)
           find_library(log-lib log)
+          # FIX 2: Ensuring safe linking with Android Native libraries
           target_link_libraries(native-lib ${log-lib})
           EOF
 
@@ -297,7 +299,7 @@ jobs:
           EOF
 
       # ==========================================
-      # STEP 7: Core App Manifest & Real Kotlin Logic
+      # STEP 7: Core App Manifest & Pure English Logic
       # ==========================================
       - name: "Robot Step 19: Write AndroidManifest.xml Architecture"
         run: |
@@ -327,7 +329,7 @@ jobs:
           </manifest>
           EOF
 
-      - name: "Robot Step 20: Write 3D Center Geometry & Dynamic Side-Drawer Memory MainActivity.kt"
+      - name: "Robot Step 20: Write MainActivity.kt (Fixed ANR & Limits)"
         run: |
           cat > app/src/main/java/com/zeeshan/notice/MainActivity.kt <<'EOF'
           package com.zeeshan.notice
@@ -467,10 +469,14 @@ jobs:
                   init {
                       System.loadLibrary("native-lib")
                   }
-                  const val MAX_STORAGE_BYTES: Long = 100L * 1024L * 1024L * 1024L // Exact 100 GB
+                  // New limit: 30 MB
+                  const val MAX_STORAGE_BYTES: Long = 30L * 1024L * 1024L 
               }
 
               private external fun getStorageUsageBytes(appDirPath: String): Long
+
+              // FIX 1: Thread-safe cached memory tracking to avoid ANR on Main UI
+              @Volatile private var currentUsedBytesCached: Long = 0L
 
               private lateinit var dbHelper: DatabaseHelper
               private lateinit var prefs: SharedPreferences
@@ -529,9 +535,6 @@ jobs:
                       layoutParams = FrameLayout.LayoutParams(-1, -1)
                   }
 
-                  // ==========================================
-                  // Perfect Mathematical Header Geometry Layout
-                  // ==========================================
                   dashboardHeader = FrameLayout(this).apply {
                       setBackgroundColor(Color.parseColor("#3D2314"))
                       setPadding(20, 25, 20, 25)
@@ -549,13 +552,12 @@ jobs:
                       setOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
                   }
 
-                  // 3D Drop-Shadow Mathematical Center Geometry Title
                   dashboardTitleTv = TextView(this).apply {
                       text = "𝐙𝐞𝐞𝐬𝐡𝐚𝐧 𝐍𝐨𝐭𝐢𝐜𝐞"
                       textSize = 22f
                       setTypeface(null, Typeface.BOLD)
                       setTextColor(Color.parseColor("#FDFBF7"))
-                      setShadowLayer(8f, 3f, 5f, Color.parseColor("#1C100A")) // 3D Shadow
+                      setShadowLayer(8f, 3f, 5f, Color.parseColor("#1C100A"))
                       gravity = Gravity.CENTER
                       layoutParams = FrameLayout.LayoutParams(-1, -2, Gravity.CENTER)
                   }
@@ -563,7 +565,6 @@ jobs:
                   dashboardHeader.addView(dashboardTitleTv)
                   dashboardHeader.addView(menuBtn)
 
-                  // Editor Header
                   projectHeader = LinearLayout(this).apply {
                       orientation = LinearLayout.HORIZONTAL
                       gravity = Gravity.CENTER_VERTICAL
@@ -602,7 +603,6 @@ jobs:
                   projectHeader.addView(projectTitleTv)
                   projectHeader.addView(saveBtn)
 
-                  // Notice List Layout
                   noticeListLayout = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
                       setPadding(30, 30, 30, 30)
@@ -610,7 +610,7 @@ jobs:
                   }
 
                   emptyStateTv = TextView(this).apply {
-                      text = "कोई पेज या फोल्डर उपलब्ध नहीं है\nनया फोल्डर या पेज बनाने के लिए नीचे '+' दबाएं"
+                      text = "No folders or pages available.\nTap '+' below to create a new folder or page."
                       textSize = 15f
                       setTextColor(Color.GRAY)
                       gravity = Gravity.CENTER
@@ -618,7 +618,6 @@ jobs:
                   }
                   noticeListLayout.addView(emptyStateTv)
 
-                  // Editor Layout
                   editorLayout = LinearLayout(this).apply {
                       orientation = LinearLayout.VERTICAL
                       setBackgroundColor(Color.WHITE)
@@ -677,7 +676,7 @@ jobs:
                   styleToolBar.addView(lockToggleBtn)
 
                   noteEditText = DynamicCanvasEditText(this).apply {
-                      hint = "यहाँ अपना नोटिस लिखें..."
+                      hint = "Write your notice here..."
                       textSize = 16f
                       setPadding(40, 40, 40, 40)
                       gravity = Gravity.TOP
@@ -712,7 +711,7 @@ jobs:
                               Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
                           )
                           isSelfTextChange = false
-                          updateMemoryUsage100GB()
+                          // FIX: Removed sync storage usage call from TextWatcher (Avoids lag/Freeze when typing fast)
                       }
                   })
 
@@ -750,9 +749,6 @@ jobs:
                   mainContainer.addView(editorLayout)
                   mainContainer.addView(fabLayout)
 
-                  // ==========================================
-                  // Side Navigation Drawer Memory Server Card
-                  // ==========================================
                   val navView = NavigationView(this).apply {
                       layoutParams = DrawerLayout.LayoutParams(720, -1).apply {
                           gravity = GravityCompat.START
@@ -787,14 +783,14 @@ jobs:
                   drawerProgressView = View(this).apply {
                       layoutParams = FrameLayout.LayoutParams(0, -1)
                       background = GradientDrawable().apply {
-                          setColor(Color.parseColor("#2ECC71")) // Bright Green
+                          setColor(Color.parseColor("#2ECC71"))
                           cornerRadius = 14f
                       }
                   }
                   progressTrack.addView(drawerProgressView)
 
                   drawerMemoryText = TextView(this).apply {
-                      text = "0.00 KB / 100 GB"
+                      text = "0.00 KB / 30 MB"
                       textSize = 15f
                       setTypeface(null, Typeface.BOLD)
                       setTextColor(Color.parseColor("#5A3822"))
@@ -811,19 +807,18 @@ jobs:
                   setContentView(drawerLayout)
 
                   loadCurrentDirectoryItems()
-                  updateMemoryUsage100GB()
+                  updateMemoryUsage()
               }
 
               private fun isMemoryFull(): Boolean {
-                  val usedBytes = getStorageUsageBytes(chunkServerDir.absolutePath)
-                  return usedBytes >= MAX_STORAGE_BYTES
+                  return currentUsedBytesCached >= MAX_STORAGE_BYTES
               }
 
               private fun showMemoryFullPopUp() {
                   AlertDialog.Builder(this)
                       .setTitle("⚠️ Memory Full!")
-                      .setMessage("आपकी 100 GB की सर्वर मेमोरी पूरी तरह भर चुकी है!\n\nअब नया डेटा या टेक्स्ट सेव नहीं होगा। कृपया नया टेक्स्ट लिखने के लिए पुराना डेटा डिलीट करें।")
-                      .setPositiveButton("ठीक है (OK)", null)
+                      .setMessage("Your 30 MB server memory is completely full!\n\nNew data cannot be saved. Please delete old records to free up space.")
+                      .setPositiveButton("OK", null)
                       .setCancelable(false)
                       .show()
               }
@@ -848,7 +843,7 @@ jobs:
                       val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                       imm.hideSoftInputFromWindow(noteEditText.windowToken, 0)
                       if (!isMemoryFull()) {
-                          Toast.makeText(this, "🔒 पेज सुरक्षित है (6x Zoom सक्रिय)", Toast.LENGTH_SHORT).show()
+                          Toast.makeText(this, "🔒 Page Locked (6x Zoom Active)", Toast.LENGTH_SHORT).show()
                       }
                   } else {
                       lockToggleBtn.text = "🔓"
@@ -857,7 +852,7 @@ jobs:
                       noteEditText.requestFocus()
                       val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
                       imm.showSoftInput(noteEditText, InputMethodManager.SHOW_IMPLICIT)
-                      Toast.makeText(this, "🔓 अनलॉक! टाइपिंग चालू है", Toast.LENGTH_SHORT).show()
+                      Toast.makeText(this, "🔓 Unlocked! Typing enabled", Toast.LENGTH_SHORT).show()
                   }
               }
 
@@ -872,8 +867,8 @@ jobs:
                       .setMessage(message)
                       .setView(input)
                       .setCancelable(true)
-                      .setPositiveButton("Unlock", null)
-                      .setNegativeButton("Cancel", null)
+                      .setPositiveButton("SHOW", null)
+                      .setNegativeButton("CANCEL", null)
                       .create()
 
                   dialog.setOnShowListener {
@@ -884,7 +879,7 @@ jobs:
                               dialog.dismiss()
                               onSuccess()
                           } else {
-                              Toast.makeText(this, "❌ गलत PIN!", Toast.LENGTH_SHORT).show()
+                              Toast.makeText(this, "❌ Incorrect PIN!", Toast.LENGTH_SHORT).show()
                           }
                       }
                   }
@@ -973,7 +968,7 @@ jobs:
                       setOnClickListener {
                           activeColor = tempSelectedColor
                           updateColorButtonUI()
-                          Toast.makeText(this@MainActivity, "कलर बदल गया!", Toast.LENGTH_SHORT).show()
+                          Toast.makeText(this@MainActivity, "Color Applied!", Toast.LENGTH_SHORT).show()
                           dialog.dismiss()
                       }
                   }
@@ -1044,25 +1039,25 @@ jobs:
 
               private fun showPageStyleDialog() {
                   val options = arrayOf(
-                      "📄 1. प्लेन पेज (Plain)",
-                      "📝 2. आड़ी नकीर (Ruled Lines)",
-                      "🔲 3. चौकुड़ी नकीर (Grid / Box)",
-                      "📑 4. खड़ी नकीर (Vertical Line)"
+                      "📄 1. Plain Page",
+                      "📝 2. Ruled Lines",
+                      "🔲 3. Grid / Box Style",
+                      "📑 4. Vertical Margin Line"
                   )
                   val keys = arrayOf("Plain", "Ruled", "Grid", "Vertical")
 
                   selectedStyleTemp = noteEditText.pageStyle
 
                   AlertDialog.Builder(this)
-                      .setTitle("पेज स्टाइल चुनें")
+                      .setTitle("Select Page Style")
                       .setSingleChoiceItems(options, keys.indexOf(noteEditText.pageStyle)) { _, which ->
                           selectedStyleTemp = keys[which]
                       }
-                      .setPositiveButton("Show / Apply") { _, _ ->
+                      .setPositiveButton("SHOW") { _, _ ->
                           noteEditText.pageStyle = selectedStyleTemp
-                          Toast.makeText(this, "पेज स्टाइल बदल गया!", Toast.LENGTH_SHORT).show()
+                          Toast.makeText(this, "Page style updated!", Toast.LENGTH_SHORT).show()
                       }
-                      .setNegativeButton("Cancel", null)
+                      .setNegativeButton("CANCEL", null)
                       .show()
               }
 
@@ -1085,6 +1080,7 @@ jobs:
                       .setItems(options) { _, which ->
                           if (which == 0) promptCreateFolder() else promptCreateNewPage()
                       }
+                      .setNegativeButton("CANCEL", null)
                       .show()
               }
 
@@ -1092,14 +1088,14 @@ jobs:
                   val input = EditText(this)
                   AlertDialog.Builder(this)
                       .setTitle("📁 Create New Folder")
-                      .setMessage("फोल्डर का नाम दर्ज करें:")
+                      .setMessage("Enter folder name:")
                       .setView(input)
-                      .setPositiveButton("Create") { _, _ ->
+                      .setPositiveButton("CREATE") { _, _ ->
                           val name = input.text.toString().ifEmpty { "New Folder" }
                           saveFolderToDb(name, currentFolderId)
                           loadCurrentDirectoryItems()
                       }
-                      .setNegativeButton("Cancel", null)
+                      .setNegativeButton("CANCEL", null)
                       .show()
               }
 
@@ -1107,15 +1103,15 @@ jobs:
                   val input = EditText(this)
                   AlertDialog.Builder(this)
                       .setTitle("📄 Create New Page")
-                      .setMessage("पेज का टाइटल दर्ज करें:")
+                      .setMessage("Enter page title:")
                       .setView(input)
-                      .setPositiveButton("Open Editor") { _, _ ->
+                      .setPositiveButton("CREATE") { _, _ ->
                           val title = input.text.toString().ifEmpty { "Untitled Page" }
                           editingNoteId = null
                           editingChunkFile = "chunk_" + System.currentTimeMillis() + ".bin"
                           openEditor(title, "")
                       }
-                      .setNegativeButton("Cancel", null)
+                      .setNegativeButton("CANCEL", null)
                       .show()
               }
 
@@ -1130,7 +1126,7 @@ jobs:
                       put("is_editor_locked", 1)
                   }
                   val id = db.insert("items", null, values)
-                  updateMemoryUsage100GB()
+                  updateMemoryUsage()
                   return id
               }
 
@@ -1172,7 +1168,7 @@ jobs:
                       setOnClickListener {
                           if (item.isFolder) {
                               if (item.isLocked) {
-                                  promptPinLock("🔐 Locked Folder", "इस फोल्डर को खोलने के लिए PIN दर्ज करें:") {
+                                  promptPinLock("🔐 Locked Folder", "Enter PIN to unlock this folder:") {
                                       currentFolderId = item.id
                                       dashboardTitleTv.text = "📁 ${item.title}"
                                       loadCurrentDirectoryItems()
@@ -1184,7 +1180,7 @@ jobs:
                               }
                           } else {
                               if (item.isLocked) {
-                                  promptPinLock("🔐 Locked Page", "इस पेज को खोलने के लिए PIN दर्ज करें:") {
+                                  promptPinLock("🔐 Locked Page", "Enter PIN to unlock this page:") {
                                       editingNoteId = item.id
                                       editingChunkFile = item.chunkFileName
                                       val loadedContent = readChunkFileContent(item.chunkFileName)
@@ -1245,7 +1241,7 @@ jobs:
               }
 
               private fun showOptionMenu(item: ItemModel) {
-                  val lockOption = if (item.isLocked) "🔓 Unlock (हटाएं पासवर्ड)" else "🔐 Lock (पासवर्ड लगाएं)"
+                  val lockOption = if (item.isLocked) "🔓 Remove Password" else "🔐 Add Password"
                   val options = arrayOf("✏ Rename", lockOption, "🗑 Delete")
 
                   AlertDialog.Builder(this)
@@ -1266,8 +1262,8 @@ jobs:
                   val cv = ContentValues().apply { put("is_locked", newLockState) }
                   db.update("items", cv, "id = ?", arrayOf(item.id.toString()))
                   
-                  val itemType = if (item.isFolder) "फोल्डर" else "पेज"
-                  val msg = if (newLockState == 1) "🔒 $itemType पर सफलता से पासवर्ड लग गया!" else "🔓 $itemType का पासवर्ड हट गया!"
+                  val itemType = if (item.isFolder) "Folder" else "Page"
+                  val msg = if (newLockState == 1) "🔒 $itemType successfully locked!" else "🔓 $itemType lock removed!"
                   Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                   loadCurrentDirectoryItems()
               }
@@ -1277,14 +1273,14 @@ jobs:
                   AlertDialog.Builder(this)
                       .setTitle("Rename")
                       .setView(input)
-                      .setPositiveButton("Save") { _, _ ->
+                      .setPositiveButton("SHOW") { _, _ ->
                           val newTitle = input.text.toString().ifEmpty { item.title }
                           val db = dbHelper.writableDatabase
                           val cv = ContentValues().apply { put("title", newTitle) }
                           db.update("items", cv, "id = ?", arrayOf(item.id.toString()))
                           loadCurrentDirectoryItems()
                       }
-                      .setNegativeButton("Cancel", null)
+                      .setNegativeButton("CANCEL", null)
                       .show()
               }
 
@@ -1296,16 +1292,17 @@ jobs:
                   }
                   db.delete("items", "id = ? OR parent_id = ?", arrayOf(item.id.toString(), item.id.toString()))
                   loadCurrentDirectoryItems()
-                  updateMemoryUsage100GB()
+                  updateMemoryUsage()
               }
 
               private fun saveCurrentNoteChunk() {
+                  // Check Cached limits for performance
                   if (isMemoryFull()) {
                       showMemoryFullPopUp()
                       return
                   }
 
-                  val currentUsedBytes = getStorageUsageBytes(chunkServerDir.absolutePath)
+                  val currentUsedBytes = currentUsedBytesCached
                   val availableBytes = MAX_STORAGE_BYTES - currentUsedBytes
 
                   if (availableBytes <= 0) {
@@ -1319,7 +1316,7 @@ jobs:
 
                   val contentBytes = htmlContent.toByteArray(Charsets.UTF_8)
                   val finalContent = if (contentBytes.size > availableBytes) {
-                      Toast.makeText(this, "⚠️ स्टोरेज सीमा के कारण डेटा ट्रंकेट किया गया", Toast.LENGTH_LONG).show()
+                      Toast.makeText(this, "⚠️ Data truncated due to storage limit", Toast.LENGTH_LONG).show()
                       String(contentBytes, 0, availableBytes.toInt(), Charsets.UTF_8)
                   } else {
                       htmlContent
@@ -1347,10 +1344,10 @@ jobs:
                       db.update("items", cv, "id = ?", arrayOf(editingNoteId.toString()))
                   }
 
-                  Toast.makeText(this, "सुरक्षित चंक सर्वर में सेव हो गया!", Toast.LENGTH_SHORT).show()
+                  Toast.makeText(this, "Chunk saved successfully!", Toast.LENGTH_SHORT).show()
                   closeEditor()
                   loadCurrentDirectoryItems()
-                  updateMemoryUsage100GB()
+                  updateMemoryUsage()
               }
 
               private fun writeChunkFileContent(fileName: String, content: String) {
@@ -1413,39 +1410,35 @@ jobs:
                   activeColor = Color.BLACK
               }
 
-              // ==========================================
-              // Dynamic Units Memory Engine (0.00 KB ➔ MB ➔ GB)
-              // ==========================================
-              private fun updateMemoryUsage100GB() {
-                  val bytes = getStorageUsageBytes(chunkServerDir.absolutePath)
-                  val kbUsed = bytes.toDouble() / 1024.0
-                  val mbUsed = kbUsed / 1024.0
-                  val gbUsed = mbUsed / 1024.0
+              private fun updateMemoryUsage() {
+                  // FIX 1: Run strictly on Background thread and use UI Thread for Updates only
+                  Thread {
+                      val bytes = getStorageUsageBytes(chunkServerDir.absolutePath)
+                      currentUsedBytesCached = bytes // Update Cache safely
 
-                  when {
-                      gbUsed >= 1.0 -> {
-                          drawerMemoryText.text = String.format("%.2f GB / 100 GB", gbUsed)
-                      }
-                      mbUsed >= 1.0 -> {
-                          drawerMemoryText.text = String.format("%.2f MB / 100 GB", mbUsed)
-                      }
-                      else -> {
-                          drawerMemoryText.text = String.format("%.2f KB / 100 GB", kbUsed)
-                      }
-                  }
+                      val kbUsed = bytes.toDouble() / 1024.0
+                      val mbUsed = kbUsed / 1024.0
 
-                  // Update Progress Bar Fill & Color (Green -> Red)
-                  val fraction = (bytes.toDouble() / MAX_STORAGE_BYTES.toDouble()).coerceIn(0.0, 1.0)
-                  val targetWidth = (720 * fraction).toInt()
+                      val memoryText = when {
+                          mbUsed >= 1.0 -> String.format("%.2f MB / 30 MB", mbUsed)
+                          else -> String.format("%.2f KB / 30 MB", kbUsed)
+                      }
 
-                  drawerProgressView.layoutParams = FrameLayout.LayoutParams(targetWidth, -1)
-                  
-                  val bgDrawable = drawerProgressView.background as GradientDrawable
-                  if (fraction >= 0.90) {
-                      bgDrawable.setColor(Color.parseColor("#E74C3C")) // Red Alert
-                  } else {
-                      bgDrawable.setColor(Color.parseColor("#2ECC71")) // Green Normal
-                  }
+                      val fraction = (bytes.toDouble() / MAX_STORAGE_BYTES.toDouble()).coerceIn(0.0, 1.0)
+                      val targetWidth = (720 * fraction).toInt()
+
+                      runOnUiThread {
+                          drawerMemoryText.text = memoryText
+                          drawerProgressView.layoutParams = FrameLayout.LayoutParams(targetWidth, -1)
+                          
+                          val bgDrawable = drawerProgressView.background as GradientDrawable
+                          if (fraction >= 0.90) {
+                              bgDrawable.setColor(Color.parseColor("#E74C3C"))
+                          } else {
+                              bgDrawable.setColor(Color.parseColor("#2ECC71"))
+                          }
+                      }
+                  }.start()
               }
           }
           EOF
@@ -1461,4 +1454,3 @@ jobs:
         with:
           name: Zeeshan-Notice-APK
           path: app/build/outputs/apk/debug/app-debug.apk
-
